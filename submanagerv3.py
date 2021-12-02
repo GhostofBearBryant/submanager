@@ -158,7 +158,7 @@ def checkSubmissions(submissions):
                 this_comment.mod.lock()
                 submission.mod.remove(mod_note='removed as spam')
                 submission.mod.lock()
-                notes = pmtw.Usernotes(r, {submission.subreddit})
+                notes = pmtw.Usernotes(r, submission.subreddit)
                 link = f'{submission.permalink}'
                 n = pmtw.Note(user=f'{submission.author}', note='Spam', link=link, warning='spam')
                 notes.add_note(n)
@@ -242,7 +242,7 @@ def banPhrase(subreddit):
                         ban_sub = item.subreddit.display_name
                         banned_message = f"Please read this entire message before sending a reply. This **comment** may have fully or partially contributed to your ban: [{item.body}]({item.permalink}). **So what comes next?**  Modmails with an accusatory, or inflammatory tone will not get a reply.  You may request an appeal of your ban but immediate replies to the ban message with an angry tone will not be given priority.  Sending messages to individual mods outside of modmail is not allowed. [Please read our rules before contacting us.](http://reddit.com/r/{item.subreddit}/about/rules)"
                         r.subreddit(ban_sub).banned.add(f'{item.author}', ban_reason='bot_ban', ban_message=f'{banned_message}', note=f'{item.permalink}')
-                        notes = pmtw.Usernotes(r, {ban_sub})
+                        notes = pmtw.Usernotes(r, item.subreddit)
                         link = f'{item.permalink}'
                         n = pmtw.Note(user=f'{item.link_author}', note='Ban', link=link)
                         notes.add_note(n)
@@ -252,7 +252,7 @@ def banPhrase(subreddit):
                         ban_sub = item.subreddit.display_name
                         banned_message = f"Please read this entire message before sending a reply. This **Submission** may have fully or partially contributed to your ban: [{item.title}]({item.permalink}). **So what comes next?**  Modmails with an accusatory, or inflammatory tone will not get a reply.  You may request an appeal of your ban but immediate replies to the ban message with an angry tone will not be given priority.  Sending messages to individual mods outside of modmail is not allowed. [Please read our rules before contacting us.](http://reddit.com/r/{item.subreddit}/about/rules)"
                         r.subreddit(ban_sub).banned.add(f'{item.author}', ban_reason='bot_ban',ban_message=f'{banned_message}', note=f'{item.permalink}')
-                        notes = pmtw.Usernotes(r, {ban_sub})
+                        notes = pmtw.Usernotes(r, item.subreddit)
                         link = f'{item.permalink}'
                         n = pmtw.Note(user=f'{item.link_author}', note='Ban', link=link)
                         notes.add_note(n)
@@ -293,7 +293,7 @@ def checkModqueue(reports):
                 print(f'r/{item.subreddit}')
                 print(f"I removed this highly reported item. https://reddit.com{item.permalink}\n")
                 logging.info(f'Downvote/Reports user: /u/{item.author} -- {item.subreddit} - {item.permalink}')
-                notes = pmtw.Usernotes(r, {item.subreddit})
+                notes = pmtw.Usernotes(r, item.subreddit)
                 link = f'{item.permalink}'
                 n = pmtw.Note(user=f'{item.author}', note='Report Removal', link=link)
                 notes.add_note(n)
@@ -310,7 +310,7 @@ def checkModqueue(reports):
                 print('        ')
                 print(f'Reports: {item.mod_reports} mod reports, {item.user_reports} user reports')
                 logging.info(f'Highly Reported user: /u/{item.author} -- {item.subreddit} - {item.permalink}')
-                notes = pmtw.Usernotes(r, {item.subreddit})
+                notes = pmtw.Usernotes(r, item.subreddit)
                 link = f'{item.permalink}'
                 n = pmtw.Note(user=f'{item.author}', note='Report Removal', link=link)
                 notes.add_note(n)
@@ -357,7 +357,7 @@ def removeOnPhrase(subreddit):
                     item.mod.remove()
                     item.mod.lock()
                     #ban_sub = item.subreddit_name_prefixed
-                    #notes = pmtw.Usernotes(r, {ban_sub})
+                    #notes = pmtw.Usernotes(r, item.subreddit)
                     #link = f'{item.permalink}'
                     #n = pmtw.Note(user=f'{item.author}', note='T-Shirt Spam', link=link)
                     #notes.add_note(n)        
@@ -410,7 +410,7 @@ def checkModLog(subreddit):
                 r.subreddit(sub_name).submit(title, selftext)
                 print(f"Action: >{log.action}< was posted in the log sub.")
                 ban_sub = log.subreddit
-                notes = pmtw.Usernotes(r, f'{ban_sub}')
+                notes = pmtw.Usernotes(r, r.subreddit(sub_name))
                 link = f'{log.target_permalink}'
                 n = pmtw.Note(user=f'{log.target_author}', note='T-Shirt Spam', link=link)
                 notes.add_note(n) 
