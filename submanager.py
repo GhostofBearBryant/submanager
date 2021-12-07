@@ -317,8 +317,8 @@ def removeOnPhrase(subreddit):
                     if str(item.fullname).startswith('t3'):
                         ban_sub = item.subreddit.display_name
                         title_text= f"Rule violation in r/{ban_sub}."
-                        other_message_text = f"Hello, u/{item.author}, Your post was removed for a violation of rule 6, no injury posts.\n\nContent: http://redd.it/{item.id} or http://reddit.com{item.permalink}\n\n*Please read our community rules located here: http://reddit.com/r/{ban_sub}/about/rules.*"
-                        message_text =  f"Hello, u/{item.author}, Your post was removed for a violation of our community rules.\n\nContent: http://redd.it/{item.id} or http://reddit.com{item.permalink}\n\n*Please read our community rules located here: http://reddit.com/r/{ban_sub}/about/rules.*"
+                        message_text = f"Hello, u/{item.author}, Your post was removed for a violation of rule 6, no injury posts.\n\nContent: http://redd.it/{item.id} or http://reddit.com{item.permalink}\n\n*Please read our community rules located here: http://reddit.com/r/{ban_sub}/about/rules.*"
+                        other_message_text =  f"Hello, u/{item.author}, Your post was removed for a violation of our community rules.\n\nContent: http://redd.it/{item.id} or http://reddit.com{item.permalink}\n\n*Please read our community rules located here: http://reddit.com/r/{ban_sub}/about/rules.*"
                         
                         if ban_sub == "kitchenconfidential":
                             r.redditor(f"{item.author}").message(title_text, message_text, from_subreddit= f"{ban_sub}")
