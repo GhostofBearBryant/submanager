@@ -68,13 +68,11 @@ def redditLogin():
     return reddit
 
 
-
 ### Define time functions for getting timestamps needed as a reference.
 def printCurrentTime():
     currentSysTime = time.localtime()
     print('      ')
     print(time.strftime('%a, %B %d, %Y | %H:%M:%S', currentSysTime))
-
 
 
 ###  Fetch submissions in the unmoderated queue.
@@ -125,7 +123,6 @@ def checkSubmissions(submissions):
                 print(f'<!> Reported post - {submission.ups} - /u/{submission.title} - r/{submission.subreddit}.<!>\n')
                 continue    
 
-            
             ### Remove conditions 
 
             # Remove posts that are downvoted below .08%.
@@ -176,7 +173,6 @@ def checkSubmissions(submissions):
                 print ('    ')
                 continue
 
-
             ###  Approve Conditions
 
             #  Check if submission author is a moderator and approve.  Mod list imported from a separate function.
@@ -220,19 +216,16 @@ def banPhrase(subreddit):
     
     ban_phrase = "!ban"
     
-
     try:
 
-        print('Checking for ban phrase...')
+        print('Checking for ban phrase [!ban]...')
         for item in subreddit.mod.modqueue(limit=None):
             
-
             for i in item.mod_reports:
                 if i[0] and ban_phrase in i[0]:
                     print(f"REMOVE ITEM {item.fullname}")
                     item.mod.remove()
                     item.mod.lock()
-
 
                     if str(item.fullname).startswith('t1'):
                         print (f"banned {item.author}")
@@ -240,14 +233,12 @@ def banPhrase(subreddit):
                         banned_message = f"Please read this entire message before sending a reply. This **comment** may have fully or partially contributed to your ban: [{item.body}]({item.permalink}). **So what comes next?**  Modmails with an accusatory, or inflammatory tone will not get a reply.  You may request an appeal of your ban but immediate replies to the ban message with an angry tone will not be given priority.  Sending messages to individual mods outside of modmail is not allowed. [Please read our rules before contacting us.](http://reddit.com/r/{item.subreddit}/about/rules)"
                         r.subreddit(ban_sub).banned.add(f'{item.author}', ban_reason='bot_ban', ban_message=f'{banned_message}', note=f'{item.permalink}')
                        
-
                     elif str(item.fullname).startswith('t3'):
                         print (f"banned {item.author}")
                         ban_sub = item.subreddit.display_name
                         banned_message = f"Please read this entire message before sending a reply. This **Submission** may have fully or partially contributed to your ban: [{item.title}]({item.permalink}). **So what comes next?**  Modmails with an accusatory, or inflammatory tone will not get a reply.  You may request an appeal of your ban but immediate replies to the ban message with an angry tone will not be given priority.  Sending messages to individual mods outside of modmail is not allowed. [Please read our rules before contacting us.](http://reddit.com/r/{item.subreddit}/about/rules)"
                         r.subreddit(ban_sub).banned.add(f'{item.author}', ban_reason='bot_ban',ban_message=f'{banned_message}', note=f'{item.permalink}')
                
-
     except Exception as e:
         print(e)
         traceback.print_exc()            
@@ -256,19 +247,14 @@ def banPhrase(subreddit):
     time.sleep(2)
             
 
-
-
 ###  Check items in the reports queue for highly reported items. 
 def checkModqueue(reports):
     print('Checking reports...')
     #reported_items = subreddit.mod.reports(limit=200)
 
-
     try:
-
         
         for item in reports:
-
 
             # Approve items that have been reviewed and reports were ignored, but post was not approved.
             if item.ignore_reports == True and item.approved == False:
@@ -277,7 +263,6 @@ def checkModqueue(reports):
                 contactMe = r.redditor("BuckRowdy").message(f"{item.id} was approved", f"Item {item.id} at http://reddit.com{item.permalink} had reports ignored but was not approved.")
                 print("Message sent!")
   
-
             # Remove comments with a -12 score and 2 reports.
             elif item.num_reports >= 2 and item.score <= -12:
                 item.mod.remove()
@@ -314,18 +299,15 @@ def checkModqueue(reports):
     time.sleep(2)        
 
 
-
-
 def removeOnPhrase(subreddit):
     
     remove_phrase = "gore"
     
     try:
 
-        print('Checking for injury posts in r/KC...')
+        print('Checking for remove on phrase [gore]...')
         for item in subreddit.mod.modqueue(limit=None):
             
-
             for i in item.mod_reports:
                 if i[0] and remove_phrase.lower() in i[0]:
                     print(f"REMOVE ITEM {item.fullname}")
@@ -347,8 +329,6 @@ def removeOnPhrase(subreddit):
 
                     elif str(item.fullname).startswith('t1'):
                         break
-
-                    
 
     except Exception as e:
         print(e)
@@ -373,9 +353,8 @@ def checkModLog(subreddit):
 
             keyphrase = "Dont say -tard"
 
-
             if log.created_utc <= fiveMinutes :
-                print(f"Item {log.action} in r/{log.subreddit} is too old")
+                print(f"Some items are too old.")
                 break
 
             elif keyphrase in log.details:
@@ -383,15 +362,14 @@ def checkModLog(subreddit):
                 title = f"Ret*rd Filter in r/{log.subreddit} for /u/{log.target_author}."
                 selftext = f"Action: {log.action}\n\nTitle: {log.target_title}\n\nBody: {log.target_body}\n\nDetails: {log.details}\n\nLink: http://reddit.com{log.target_permalink}"
                 r.subreddit(sub_name).submit(title, selftext)
-                print(f"Action: >{log.action}< was posted in the log sub.") 
+                print(f"Action: >{log.action}< in r/{log.subreddit} was posted in the log sub.") 
     
-
-            elif log.action == "removelink" and log.mod == "Anti-Evil+Operations": 
+            elif log.action == "removelink" and log.mod == "Anti-Evil Operations": 
                 sub_name = "ghostofbearbryant"
-                title = f"Action logged by u/{log.mod} in r/{log.subreddit}. "
+                title = f"Admin Action logged by u/{log.mod} in r/{log.subreddit}. "
                 selftext = f"Action: {log.action}\n\nTitle: {log.target_title}\n\nBody: {log.target_body}\n\nDetails: {log.details}\n\nLink: http://reddit.com{log.target_permalink}"
                 r.subreddit(sub_name).submit(title, selftext)
-                print(f"Action: >{log.action}< was posted in the log sub.")         
+                print(f"Action: >{log.action}< in r/{log.subreddit} was posted in the log sub.")         
             
             elif log.action == "removelink" and log.mod == "ghostofbearbryant":
                 sub_name = "ghostofbearbryant"
@@ -405,15 +383,14 @@ def checkModLog(subreddit):
                 title = f"Comment Removed in r/{log.subreddit} originally posted by /u/{log.target_author}"
                 selftext = f"Action: {log.action}\n\nComment: {log.target_body}\n\nAuthor: /u/{log.target_author}\n\nDetails: {log.details}\n\nLink: http://reddit.com{log.target_permalink}"
                 r.subreddit(sub_name).submit(title, selftext)
-                print(f"Action: >{log.action}< was posted in the log sub.")
-
+                print(f"Action: >{log.action}< in r/{log.subreddit} was posted in the log sub.")
 
             elif log.action == "removecomment" and log.mod == "Anti-Evil Operations":
                 sub_name = "ghostofbearbryant"
                 title = f"Comment Removed in r/{log.subreddit} originally posted by /u/{log.target_author}"
-                selftext = f"Action: {log.action}\n\nComment: {log.target_body}\n\nAuthor: /u/{log.target_author}\n\nDetails: {log.details}\n\nLink: http://reddit.com{log.target_permalink}"
+                selftext = f"Admin Action: {log.action}\n\nComment: {log.target_body}\n\nAuthor: /u/{log.target_author}\n\nDetails: {log.details}\n\nLink: http://reddit.com{log.target_permalink}"
                 r.subreddit(sub_name).submit(title, selftext)
-                print(f"Action: >{log.action}< was posted in the log sub.")        
+                print(f"Action: >{log.action}<  in r/{log.subreddit} was posted in the log sub.")        
 
             elif log.action == "banuser" and log.mod == "ghostofbearbryant":
                 a_string = f'{log.description}'
@@ -422,9 +399,8 @@ def checkModLog(subreddit):
                 title = f"User u/{log.target_author} banned in r/{log.subreddit}."
                 selftext = f"Action: {log.action}\n\nAuthor: /u/{log.target_author}\n\nDetails: {log.details}\n\nLink: http://reddit.com{description}"
                 r.subreddit(sub_name).submit(title, selftext)
-                print(f"Action: >{log.action}< was posted in the log sub.")
+                print(f"Action: >{log.action}<  in r/{log.subreddit} was posted in the log sub.")
                 
-
             else:
                 continue
 
@@ -435,7 +411,6 @@ def checkModLog(subreddit):
     print("Done")
     time.sleep(3)
     print("Finishing up...\n")
-
 
 
 ### Fetch the number of items left in each queue.
@@ -449,9 +424,7 @@ def howManyItems(subreddit):
     print('------------------------------------------------------------------------')
 
 
-
 ######################################
-
 
 
 ### Bot starts here
@@ -469,7 +442,6 @@ if __name__ == "__main__":
         print('\t\n### ERROR - Could not connect to reddit.')
         sys.exit(1)
  
-
     # Loop the bot
     while True:
 
@@ -480,13 +452,11 @@ if __name__ == "__main__":
             submissions = getLatestSubmissions(subreddit)
             reports = getLatestReports(subreddit)
             
-
         except Exception as e:
             print('\t### ERROR - Could not get posts from reddit')
 
         # If there are posts, start scanning
         if not submissions is None:
-
 
             # Once you have submissions, run all the bot functions.
             checkSubmissions(submissions)
@@ -495,7 +465,6 @@ if __name__ == "__main__":
             banPhrase(subreddit)
             checkModLog(subreddit)
             howManyItems(subreddit)
-
 
         # Loop every X seconds (5 minutes, currently.)
         sleep_until = (dt.now() + td(0, sleep_seconds)).strftime('%H:%M:%S')
