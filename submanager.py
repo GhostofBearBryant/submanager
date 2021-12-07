@@ -1,6 +1,6 @@
 
 
-# Subreddit Manager v.2 by u/BuckRowdy. 
+# Subreddit Manager v.4 by u/BuckRowdy. 
 
 # This bot manages your unmoderated queue and reports queue.
 # It approves or removes posts according to an algorithm.
@@ -49,12 +49,12 @@ q.close()
 ###  Defines the reddit login function
 def redditLogin():
 
-    print('Subreddit Manager is starting up - v.2')
+    print('Subreddit Manager is starting up - v.4')
     time.sleep(1)
     print('Connecting to reddit...')
     
     try:
-        reddit = praw.Reddit(   user_agent = 'Subreddit Manager Bot v.2 by u/buckrowdy',
+        reddit = praw.Reddit(   user_agent = 'Subreddit Manager Bot v.4 by u/buckrowdy for r/mod.',
                                 username = config.username,
                                 password = config.password,
                                 client_id = config.client_id,
@@ -315,47 +315,47 @@ def checkModqueue(reports):
 
 
 
+
 def removeOnPhrase(subreddit):
-
-    remove_phrase = "T-Shirt spam"
-    too_old = (60*60*24) # 24 hours
-
+    
+    remove_phrase = "gore"
+    
     try:
 
-        print(f"Checking for T-Shirt spam...")
+        print('Checking for injury posts in r/KC...')
         for item in subreddit.mod.modqueue(limit=None):
-            if (time.time() - item.created_utc) > too_old:
-               print(f"item in queue {item.id} too old")
-               break
+            
 
-            if item.banned_by:
-                # already removed
-                continue
-
-            for i in item.user_reports:
-                if i[0] and remove_phrase in i[0]:
+            for i in item.mod_reports:
+                if i[0] and remove_phrase.lower() in i[0]:
                     print(f"REMOVE ITEM {item.fullname}")
                     item.mod.remove()
                     item.mod.lock()
-                    #message_user = f'Hello u/{submission.author}. Your post to r/{submission.subreddit} has been removed.\n\n**Rule 6.** No Injury posts. We do not allow pictures of cuts and/or burns. Thanks for your cooperation.\n\n'
-                    #footer = f"*If you feel this was done in error, please [message the moderators.](https://www.reddit.com/message/compose?to=/r/{submission.subreddit}&subject=Question regarding the removal of this submission by /u/{submission.author}&message=I have a question regarding the removal of this submission: {submission.permalink})*"
-                    #comment_text = message_user + footer
-                    #post_submission = r.submission(id=submission.id)
-                    #this_comment = post_submission.reply(comment_text)
 
-            for i in item.mod_reports:
-                if i[0] and remove_phrase in i[0]:
-                    print(f"REMOVE ITEM {item.fullname}")
-                    item.mod.remove()
-                    item.mod.lock()        
+                    if str(item.fullname).startswith('t3'):
+                        ban_sub = item.subreddit.display_name
+                        title_text= f"Rule violation in r/{ban_sub}."
+                        other_message_text = f"Hello, u/{item.author}, Your post was removed for a violation of rule 6, no injury posts.\n\nContent: http://redd.it/{item.id} or http://reddit.com{item.permalink}\n\n*Please read our community rules located here: http://reddit.com/r/{ban_sub}/about/rules.*"
+                        message_text =  f"Hello, u/{item.author}, Your post was removed for a violation of our community rules.\n\nContent: http://redd.it/{item.id} or http://reddit.com{item.permalink}\n\n*Please read our community rules located here: http://reddit.com/r/{ban_sub}/about/rules.*"
+                        
+                        if ban_sub == "kitchenconfidential":
+                            r.redditor(f"{item.author}").message(title_text, message_text, from_subreddit= f"{ban_sub}")
+                            print("Message Sent!")
+                        else:    
+                            r.redditor(f"{item.author}").message(title_text, other_message_text, from_subreddit= f"{ban_sub}")
+                            print("Message Sent!")
+
+                    elif str(item.fullname).startswith('t1'):
+                        break
+
+                    
 
     except Exception as e:
         print(e)
-        traceback.print_exc()
+        traceback.print_exc()            
 
     print("Done")
     time.sleep(2)
-
 
 
 def checkModLog(subreddit):
