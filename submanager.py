@@ -280,7 +280,7 @@ def checkModqueue(reports):
             elif item.num_reports >= 5:
                 item.mod.remove()
                 item.mod.lock()
-                item.subreddit.message("I removed an item for being highly reported.", f"FYI I removed this item because it got reported 5 times: [{item}](https://reddit.com{item.permalink}) *This was performed by an automated script, please check to ensure this action was correct.*\n\n---\n\n*[^(Review my post removals)](https://reddit.com/r/mod/about/log/?type=removelink&mod=ghostofbearbryant)* -- *[[^Subreddit](http://reddit.com/r/ghostofbearbryant)*")
+                item.subreddit.message("I removed an item for being highly reported.", f"FYI I removed this item because it got reported 5 times: [{item}](https://reddit.com{item.permalink}) *This was performed by an automated script, please check to ensure this action was correct.*\n\n---\n\n*[^(Review my post removals)](https://reddit.com/r/mod/about/log/?type=removelink&mod=ghostofbearbryant)* ^(--) *[^Subreddit](http://reddit.com/r/ghostofbearbryant)*")
                 print(f'r/{item.subreddit}')
                 print(f"I removed this highly reported item. https://reddit.com{item.permalink}")
                 print('        ')
@@ -336,6 +336,60 @@ def removeOnPhrase(subreddit):
 
     print("Done")
     time.sleep(2)
+
+def reportAbuse(reports):
+    
+    ## Stolen from https://github.com/NearlCrews/MyLittleHelper
+
+    DEBUG = True
+    ra_enable = True
+    ra_total_report_threshold = 8
+    bot_owner = "^(u/ghostofbearbryant)"
+
+    for report in reports:
+        if report is None:
+            break
+
+        try:
+            #####
+            # ReportAbuse
+            #####
+            print('Checking for report abuse...')
+            if ra_enable:
+                # Set the counter to zero.
+                ra_total_reports = 0
+                ra_skip_post = False
+                # Get the post submission.
+                ra_post_submission = reddit.submission(url=report.link_permalink)
+
+                # Get all of the comments for the post.
+                ra_post_submission.comments.replace_more(limit=None)
+
+                # Walk through the comments.
+                for ra_comment in ra_post_submission.comments.list():
+                    # Check if a mod has been here.
+                    if ra_comment.distinguished:
+                        print(f'!Report Abuse!\nDistinguished comment found. Assuming a moderator was here.\n')
+                        # Keep loop sanity and just tell it not to post here later.
+                        ra_skip_post = True
+                    # Find and count any reported comments.
+                    if ra_comment.num_reports != 0:
+                        ra_total_reports += 1
+                        if DEBUG:
+                            print(f'!Report Abuse!\nCurrent report count: {ra_total_reports}\nURL: {report.link_permalink}\n')
+                if int(ra_total_reports) >= int(ra_total_report_threshold) and not ra_skip_post:
+                    if DEBUG:
+                        print(f'!REPORTABUSE!\nNotice Triggered.\n{report.link_permalink}\n{report.link_title}\n')
+                    ra_link_to_rules = f"^(http://reddit.com/r/{report.subreddit}/about/rules)"    
+                    ra_comment_text = f'Hello! This is an automated reminder that the report function is not a super-downvote button. Reported comments are manually reviewed and may be removed *if they are an actual rule violation*. Please do not report comments simply because you disagree with the content. Abuse of the report function is against the reddit content policy.\n\n*I\'m a bot and will not reply. Please contact [modmail](https://www.reddit.com/message/compose?to=/r/{report.subreddit}&subject=Question regarding this item&message=I have a question regarding this item: {report.link_permalink}) for questions or clarification*\n\n{ra_link_to_rules} ^(--) {bot_owner}'
+                    ra_this_comment = ra_post_submission.reply(ra_comment_text)
+                    ra_this_comment.mod.distinguish(how='yes', sticky=True)
+                    # Give them comment time to register for future loops.
+                    time.sleep(2) 
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+
 
 
 def checkModLog(subreddit):
@@ -461,6 +515,7 @@ if __name__ == "__main__":
             # Once you have submissions, run all the bot functions.
             checkSubmissions(submissions)
             checkModqueue(reports)
+            reportAbuse(reports)
             removeOnPhrase(subreddit)
             banPhrase(subreddit)
             checkModLog(subreddit)
