@@ -11,7 +11,7 @@ import config
 import praw
 import time
 from time import localtime, timezone
-from datetime import datetime as dt, timedelta as td, date
+from datetime import datetime as dt, timedelta as td, date, timezone
 import logging
 import traceback
 import pmtw
@@ -66,6 +66,11 @@ def redditLogin():
 
     print(f'Logged in as: {reddit.user.me()}')
     return reddit
+
+
+def contactMe(): 
+    r.redditor("BuckRowdy").message(f"{item.id} was approved", f"Item {item.id} at http://reddit.com{item.permalink} had reports ignored but was not approved.")
+    print("Message sent!")
 
 
 ### Define time functions for getting timestamps needed as a reference.
@@ -158,7 +163,7 @@ def checkSubmissions(submissions):
                 continue
 
             # Remove downvoted week old posts to clean up the sub's front page. If a post can't get at least one upvote in a week it doesn't need to be on the sub.
-            elif submission.created_utc < week and submission.upvote_ratio <= 0.25 and submission.num_reports == 0 and not submission.spam and not submission.removed and not submission.approved:
+            elif submission.created_utc < week and submission.upvote_ratio <= 0.50 and submission.num_reports == 0 and not submission.spam and not submission.removed and not submission.approved:
                 submission.mod.remove()
                 print('    ')
                 print(f'<!> [Removed week old post - with {submission.score} score] <!>')
@@ -260,9 +265,8 @@ def checkModqueue(reports):
             if item.ignore_reports == True and item.approved == False:
                 item.mod.approve()
                 print(f"{item.id} had ignored reports and was approved.")
-                contactMe = r.redditor("BuckRowdy").message(f"{item.id} was approved", f"Item {item.id} at http://reddit.com{item.permalink} had reports ignored but was not approved.")
-                print("Message sent!")
-  
+                contactMe()
+
             # Remove comments with a -12 score and 2 reports.
             elif item.num_reports >= 2 and item.score <= -12:
                 item.mod.remove()
@@ -392,6 +396,7 @@ def reportAbuse(reports):
 
 
 
+
 def checkModLog(subreddit):
 
     now = time.time()
@@ -411,12 +416,12 @@ def checkModLog(subreddit):
                 print(f"Some items are too old.")
                 break
 
-            elif keyphrase in log.details:
-                sub_name = "ghostofbearbryant"
-                title = f"Ret*rd Filter in r/{log.subreddit} for /u/{log.target_author}."
-                selftext = f"Action: {log.action}\n\nTitle: {log.target_title}\n\nBody: {log.target_body}\n\nDetails: {log.details}\n\nLink: http://reddit.com{log.target_permalink}"
-                r.subreddit(sub_name).submit(title, selftext)
-                print(f"Action: >{log.action}< in r/{log.subreddit} was posted in the log sub.") 
+            #elif keyphrase in log.details:
+                #sub_name = "ghostofbearbryant"
+                #title = f"Ret*rd Filter in r/{log.subreddit} for /u/{log.target_author}."
+                #selftext = f"Action: {log.action}\n\nTitle: {log.target_title}\n\nBody: {log.target_body}\n\nDetails: {log.details}\n\nLink: http://reddit.com{log.target_permalink}"
+                #r.subreddit(sub_name).submit(title, selftext)
+                #print(f"Action: >{log.action}< in r/{log.subreddit} was posted in the log sub.") 
     
             elif log.action == "removelink" and log.mod == "Anti-Evil Operations": 
                 sub_name = "ghostofbearbryant"
@@ -505,6 +510,7 @@ if __name__ == "__main__":
             printCurrentTime()
             submissions = getLatestSubmissions(subreddit)
             reports = getLatestReports(subreddit)
+            
             
         except Exception as e:
             print('\t### ERROR - Could not get posts from reddit')
